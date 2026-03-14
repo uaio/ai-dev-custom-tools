@@ -66,11 +66,12 @@ curl -fsSL ... | bash -s -- list
 
 ```
 ai-dev-custom-tools/
-├── skills/          # Skills 自定义技能（默认安装）
-│   └── new-demand/  # 需求追踪管理
-├── agents/          # Agents 配置（可选安装）
-├── prompts/         # Prompts 模板（可选安装）
-└── install.sh       # 安装脚本
+├── skills/              # Skills 自定义技能（默认安装）
+│   ├── new-demand/      # 需求追踪管理
+│   └── project-init/    # 项目结构初始化
+├── agents/              # Agents 配置（可选安装）
+├── prompts/             # Prompts 模板（可选安装）
+└── install.sh           # 安装脚本
 ```
 
 ## 包含的工具
@@ -86,6 +87,32 @@ ai-dev-custom-tools/
 **使用方式：**
 ```
 /new-demand [需求描述]
+```
+
+### custom:project-init
+
+项目结构初始化工具，自动分析项目并生成 `project-structure` skill：
+- 智能检测技术栈（Node/Go/Python/Rust/Java）
+- 扫描目录结构并识别核心模块
+- 生成模块化的结构说明文档
+- 检测并精简 CLAUDE.md/AGENTS.md 重复内容
+
+**使用方式：**
+```
+/project-init
+```
+
+**生成的结构：**
+```
+.claude/skills/project-structure/
+├── SKILL.md           # 主索引
+├── tech-stack.md      # 技术栈说明
+├── commands.md        # 常用命令
+├── conventions.md     # 开发规范
+└── modules/           # 模块说明
+    ├── auth.md
+    ├── api.md
+    └── ...
 ```
 
 ## 本地安装（可选）
