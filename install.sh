@@ -312,8 +312,10 @@ do_link_global_cmd() {
     echo "# open-skills" >> "$shell_rc"
     echo "$path_entry" >> "$shell_rc"
 
-    echo -e "${GREEN}✓${NC} 已添加 PATH 到 $shell_rc"
-    echo -e "${YELLOW}请运行: source $shell_rc 或重新打开终端${NC}"
+    # 立即生效（当前进程）
+    export PATH="$HOME/.open-skills/bin:$PATH"
+
+    echo -e "${GREEN}✓${NC} 已添加 PATH 到 $shell_rc（已生效）"
 }
 
 # 移除全局命令（从 PATH 中移除）
@@ -658,8 +660,10 @@ auto_link_global_cmd() {
     echo "# open-skills" >> "$shell_rc"
     echo "$path_entry" >> "$shell_rc"
 
-    echo -e "${GREEN}✓${NC} 已自动添加全局命令到 PATH"
-    echo -e "${YELLOW}请运行: source $shell_rc 或重新打开终端${NC}"
+    # 立即生效
+    export PATH="$HOME/.open-skills/bin:$PATH"
+
+    echo -e "${GREEN}✓${NC} 已自动添加全局命令到 PATH（已生效）"
 }
 
 # 运行自动检查
