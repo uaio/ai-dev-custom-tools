@@ -240,7 +240,7 @@ uninstall_all() {
 # 首次安装 setup
 do_setup() {
     echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║     open-skills 安装向导               ║${NC}
+    echo -e "${BLUE}║     open-skills 安装向导               ║${NC}"
     echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
     echo ""
 
@@ -261,7 +261,7 @@ do_setup() {
     fi
 
     # 检查 skills 命令是否可用
-    if ! command -v skills &> /dev/null; then
+    if ! command -v skills > /dev/null 2>&1; then
         do_link_global_cmd
     fi
 
@@ -279,7 +279,7 @@ do_link_global_cmd() {
     local path_entry="export PATH=\"\$HOME/.open-skills:\$PATH\""
 
     # 检查 skills 命令是否已可用
-    if command -v skills &> /dev/null; then
+    if command -v skills > /dev/null 2>&1; then
         echo -e "${CYAN}⊙${NC} 全局命令已可用: skills"
         return 0
     fi
@@ -318,7 +318,7 @@ do_unlink_global_cmd() {
     # 从 zshrc 移除
     if [ -f "$HOME/.zshrc" ] && grep -q 'HOME/.open-skills' "$HOME/.zshrc" 2>/dev/null; then
         # 移除包含 open-skills 的行
-        if command -v gsed &> /dev/null; then
+        if command -v gsed > /dev/null 2>&1; then
             gsed -i '/# open-skills/d; /HOME\/.open-skills/d' "$HOME/.zshrc"
         elif sed --version 2>&1 | grep -q GNU; then
             sed -i '/# open-skills/d; /HOME\/.open-skills/d' "$HOME/.zshrc"
@@ -332,7 +332,7 @@ do_unlink_global_cmd() {
 
     # 从 bashrc 移除
     if [ -f "$HOME/.bashrc" ] && grep -q 'HOME/.open-skills' "$HOME/.bashrc" 2>/dev/null; then
-        if command -v gsed &> /dev/null; then
+        if command -v gsed > /dev/null 2>&1; then
             gsed -i '/# open-skills/d; /HOME\/.open-skills/d' "$HOME/.bashrc"
         elif sed --version 2>&1 | grep -q GNU; then
             sed -i '/# open-skills/d; /HOME\/.open-skills/d' "$HOME/.bashrc"
@@ -623,7 +623,7 @@ auto_link_global_cmd() {
     fi
 
     # 检查 skills 命令是否存在
-    if command -v skills &> /dev/null; then
+    if command -v skills > /dev/null 2>&1; then
         return
     fi
 
