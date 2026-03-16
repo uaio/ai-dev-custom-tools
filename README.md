@@ -1,135 +1,63 @@
-# AI Dev Custom Tools
+# open-skills
 
-自定义 AI 开发工具集合，为 Claude Code、OpenAI Codex、OpenCode、OpenClaw、Gemini CLI、Cursor、GitHub Copilot 等 AI 编程助手提供增强功能。
+跨平台 AI 工具 Skills 管理器，通过软链接让多个 AI 编程助手共享同一份 skills。
 
-## 一键安装（远程）
-
-不需要 clone 仓库，直接运行：
+## 快速开始
 
 ```bash
-# 安装 skills 到 Claude Code
-curl -fsSL https://raw.githubusercontent.com/uaio/ai-dev-custom-tools/main/install.sh | bash -s -- claude
+# 一键安装（自动安装到所有工具）
+curl -fsSL https://raw.githubusercontent.com/uaio/open-skills/main/install.sh | bash -s -- init
+```
 
-# 安装 skills 到所有工具
-curl -fsSL https://raw.githubusercontent.com/uaio/ai-dev-custom-tools/main/install.sh | bash -s -- all
+## 命令
 
-# 安装指定子目录到指定工具
-curl -fsSL https://raw.githubusercontent.com/uaio/ai-dev-custom-tools/main/install.sh | bash -s -- codex agents
-curl -fsSL https://raw.githubusercontent.com/uaio/ai-dev-custom-tools/main/install.sh | bash -s -- gemini prompts
+```
+skills <命令> [工具...]
+
+命令:
+  init          首次安装
+  up            更新版本
+  rm            卸载 skills 本身
+  ls            查看状态
+  all           一键安装
+  clear         移除软链接
+  <工具>        安装到指定工具
+  rm <工具>     从指定工具移除
 ```
 
 ## 支持的工具
 
-| 工具名 | 名称 | 安装目录 |
-|--------|------|----------|
-| `claude` | Claude Code | `~/.claude/skills/` |
-| `codex` | OpenAI Codex | `~/.codex/skills/` |
-| `opencode` | OpenCode | `~/.opencode/skill/` |
-| `openclaw` | OpenClaw | `~/.openclaw/skills/` |
-| `gemini` | Gemini CLI | `~/.gemini/skills/` |
-| `cursor` | Cursor | `~/.cursor/skills/` |
+```
+claude  openclaw  codex  gemini  continue  windsurf  cursor  copilot  opencode
+```
 
-## 用法
+- `skills all` 一键安装到 `~/.claude/skills`、`~/.agents/skills`、`~/.openclaw/skills`
+- 所有工具都能兼容这三个目录
+
+## 示例
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/uaio/ai-dev-custom-tools/main/install.sh | bash -s -- [工具] [子目录]
+skills init          # 首次安装
+skills all           # 一键安装
+skills claude        # 单独安装到 Claude
+skills openclaw      # 单独安装到 OpenClaw
+skills codex         # 单独安装到 Codex
+skills rm codex      # 从 Codex 移除
+skills ls            # 查看状态
 ```
 
-| 参数 | 说明 | 默认值 |
-|------|------|--------|
-| 工具 | 目标 AI 工具名称，或 `all` 安装到所有工具 | 必填 |
-| 子目录 | 仓库中要复制的子目录 | `skills` |
-
-### 示例
+## 手动配置全局命令
 
 ```bash
-# 安装默认目录(skills)到 Claude Code
-curl -fsSL ... | bash -s -- claude
+# 方法 1: PATH
+export PATH="$HOME/.open-skills:$PATH"
 
-# 安装到所有工具
-curl -fsSL ... | bash -s -- all
+# 方法 2: alias
+alias skills='bash $HOME/.open-skills/install.sh'
 
-# 安装 agents 目录到 Codex
-curl -fsSL ... | bash -s -- codex agents
-
-# 安装 prompts 目录到 Gemini
-curl -fsSL ... | bash -s -- gemini prompts
-
-# 查看帮助
-curl -fsSL ... | bash -s -- help
-
-# 查看仓库可用目录
-curl -fsSL ... | bash -s -- list
+# 方法 3: 软链接
+sudo ln -s $HOME/.open-skills/install.sh /usr/local/bin/skills
 ```
-
-## 仓库目录结构
-
-```
-ai-dev-custom-tools/
-├── skills/              # Skills 自定义技能（默认安装）
-│   ├── new-demand/      # 需求追踪管理
-│   └── project-init/    # 项目结构初始化
-├── agents/              # Agents 配置（可选安装）
-├── prompts/             # Prompts 模板（可选安装）
-└── install.sh           # 安装脚本
-```
-
-## 包含的工具
-
-### custom:new-demand
-
-需求追踪管理工具，支持：
-- 自动生成带时间标号的需求标题
-- 创建结构化的任务列表
-- 任务状态追踪和更新
-- 进度汇总和归档
-
-**使用方式：**
-```
-/new-demand [需求描述]
-```
-
-### custom:project-init
-
-项目结构初始化工具，自动分析项目并生成 `project-structure` skill：
-- 智能检测技术栈（Node/Go/Python/Rust/Java）
-- 扫描目录结构并识别核心模块
-- 生成模块化的结构说明文档
-- 检测并精简 CLAUDE.md/AGENTS.md 重复内容
-
-**使用方式：**
-```
-/project-init
-```
-
-**生成的结构：**
-```
-.claude/skills/project-structure/
-├── SKILL.md           # 主索引
-├── tech-stack.md      # 技术栈说明
-├── commands.md        # 常用命令
-├── conventions.md     # 开发规范
-└── modules/           # 模块说明
-    ├── auth.md
-    ├── api.md
-    └── ...
-```
-
-## 本地安装（可选）
-
-如果想先 clone 再安装：
-
-```bash
-git clone https://github.com/uaio/ai-dev-custom-tools.git
-cd ai-dev-custom-tools
-./install.sh claude          # 安装 skills 到 Claude Code
-./install.sh codex agents    # 安装 agents 到 Codex
-./install.sh all             # 安装 skills 到所有工具
-```
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！
 
 ## License
 
