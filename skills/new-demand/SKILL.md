@@ -1,6 +1,7 @@
 name: custom:new-demand
 description: 启动「需求+时间标号 + 主skill目录下嵌套tasks/子文件夹」工作流。Use when 用户想新建需求追踪时。
 argument-hint: [需求描述]
+context: fork
 
 ---
 
