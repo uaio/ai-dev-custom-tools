@@ -28,8 +28,6 @@ NC='\033[0m'
 # 项目配置
 REPO_URL="https://github.com/uaio/open-skills.git"
 OPEN_SKILLS_DIR="$HOME/.open-skills"
-BIN_DIR="/usr/local/bin"
-CMD_NAME="skills"
 
 # 获取脚本所在目录（项目根目录）
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -288,66 +286,84 @@ do_setup() {
     echo -e "更多命令运行 ${CYAN}skills help${NC} 查看"
 }
 
-# 创建全局命令软链接
+# 创建全局命令（通过 PATH 方式）
 do_link_global_cmd() {
-    local target="$BIN_DIR/$CMD_NAME"
-    local source="$OPEN_SKILLS_DIR/install.sh"
+    local path_entry="export PATH=\"\$HOME/.open-skills:\$PATH\""
 
-    # 检查是否已存在
-    if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
-        echo -e "${CYAN}⊙${NC} 全局命令已存在: $CMD_NAME"
+    # 检查 skills 命令是否已可用
+    if command -v skills &> /dev/null; then
+        echo -e "${CYAN}⊙${NC} 全局命令已可用: skills"
         return 0
     fi
 
-    # 尝试直接创建
-    if ln -s "$source" "$target" 2>/dev/null; then
-        echo -e "${GREEN}✓${NC} 全局命令已创建: $CMD_NAME -> $source"
-        return 0
-    fi
-
-    # 需要 sudo
-    echo -e "${YELLOW}需要管理员权限创建全局命令...${NC}"
-    if sudo ln -s "$source" "$target"; then
-        echo -e "${GREEN}✓${NC} 全局命令已创建: $CMD_NAME -> $source"
-        return 0
+    # 检测 shell 配置文件
+    local shell_rc=""
+    if [ -n "$ZSH_VERSION" ]; then
+        shell_rc="$HOME/.zshrc"
+    elif [ -n "$BASH_VERSION" ]; then
+        shell_rc="$HOME/.bashrc"
     else
-        echo -e "${RED}✗${NC} 创建全局命令失败"
-        echo ""
-        echo "你可以手动添加到 PATH："
-        echo ""
-        echo "  # 添加到 ~/.zshrc 或 ~/.bashrc："
-        echo "  export PATH=\"\$HOME/.open-skills:\$PATH\""
-        echo ""
-        echo "  # 或者创建 alias："
-        echo "  alias skills='bash \$HOME/.open-skills/install.sh'"
-        echo ""
-        return 1
+        # 默认使用 zshrc (macOS)
+        shell_rc="$HOME/.zshrc"
     fi
+
+    # 检查是否已添加 PATH
+    if [ -f "$shell_rc" ] && grep -q 'HOME/.open-skills' "$shell_rc" 2>/dev/null; then
+        echo -e "${CYAN}⊙${NC} PATH 已配置在 $shell_rc"
+        echo -e "${YELLOW}请运行: source $shell_rc 或重新打开终端${NC}"
+        return 0
+    fi
+
+    # 添加 PATH 到配置文件
+    echo "" >> "$shell_rc"
+    echo "# open-skills" >> "$shell_rc"
+    echo "$path_entry" >> "$shell_rc"
+
+    echo -e "${GREEN}✓${NC} 已添加 PATH 到 $shell_rc"
+    echo -e "${YELLOW}请运行: source $shell_rc 或重新打开终端${NC}"
 }
 
-# 移除全局命令
+# 移除全局命令（从 PATH 中移除）
 do_unlink_global_cmd() {
-    local target="$BIN_DIR/$CMD_NAME"
+    local removed=false
 
-    if [ ! -L "$target" ]; then
-        echo -e "${CYAN}⊙${NC} 全局命令不存在"
-        return 0
+    # 从 zshrc 移除
+    if [ -f "$HOME/.zshrc" ] && grep -q 'HOME/.open-skills' "$HOME/.zshrc" 2>/dev/null; then
+        # 移除包含 open-skills 的行
+        if command -v gsed &> /dev/null; then
+            gsed -i '/# open-skills/d; /HOME\/.open-skills/d' "$HOME/.zshrc"
+        elif sed --version 2>&1 | grep -q GNU; then
+            sed -i '/# open-skills/d; /HOME\/.open-skills/d' "$HOME/.zshrc"
+        else
+            # macOS sed
+            sed -i '' '/# open-skills/d; /HOME\/.open-skills/d' "$HOME/.zshrc"
+        fi
+        echo -e "${GREEN}✓${NC} 已从 ~/.zshrc 移除 PATH 配置"
+        removed=true
     fi
 
-    # 尝试直接删除
-    if rm "$target" 2>/dev/null; then
-        echo -e "${GREEN}✓${NC} 全局命令已移除"
-        return 0
+    # 从 bashrc 移除
+    if [ -f "$HOME/.bashrc" ] && grep -q 'HOME/.open-skills' "$HOME/.bashrc" 2>/dev/null; then
+        if command -v gsed &> /dev/null; then
+            gsed -i '/# open-skills/d; /HOME\/.open-skills/d' "$HOME/.bashrc"
+        elif sed --version 2>&1 | grep -q GNU; then
+            sed -i '/# open-skills/d; /HOME\/.open-skills/d' "$HOME/.bashrc"
+        else
+            sed -i '' '/# open-skills/d; /HOME\/.open-skills/d' "$HOME/.bashrc"
+        fi
+        echo -e "${GREEN}✓${NC} 已从 ~/.bashrc 移除 PATH 配置"
+        removed=true
     fi
 
-    # 需要 sudo
-    echo -e "${YELLOW}需要管理员权限移除全局命令...${NC}"
-    if sudo rm "$target"; then
-        echo -e "${GREEN}✓${NC} 全局命令已移除"
-        return 0
-    else
-        echo -e "${RED}✗${NC} 移除全局命令失败"
-        return 1
+    if [ "$removed" = false ]; then
+        echo -e "${CYAN}⊙${NC} 未找到 PATH 配置"
+    fi
+
+    # 同时尝试移除旧的软链接方式（兼容）
+    local target="/usr/local/bin/skills"
+    if [ -L "$target" ]; then
+        rm "$target" 2>/dev/null || sudo rm "$target" 2>/dev/null
+        echo -e "${GREEN}✓${NC} 已移除旧的全局命令软链接"
     fi
 }
 
@@ -623,15 +639,34 @@ auto_link_global_cmd() {
         return
     fi
 
-    # 自动创建全局命令
-    local target="$BIN_DIR/$CMD_NAME"
-    local source="$OPEN_SKILLS_DIR/install.sh"
-
-    if ln -s "$source" "$target" 2>/dev/null; then
-        echo -e "${GREEN}✓${NC} 已自动创建全局命令: skills"
-    elif sudo ln -s "$source" "$target" 2>/dev/null; then
-        echo -e "${GREEN}✓${NC} 已自动创建全局命令: skills (sudo)"
+    # 检查 PATH 中是否已包含
+    if echo "$PATH" | grep -q "$HOME/.open-skills"; then
+        return
     fi
+
+    # 检测 shell 配置文件
+    local shell_rc=""
+    if [ -n "$ZSH_VERSION" ]; then
+        shell_rc="$HOME/.zshrc"
+    elif [ -n "$BASH_VERSION" ]; then
+        shell_rc="$HOME/.bashrc"
+    else
+        shell_rc="$HOME/.zshrc"
+    fi
+
+    # 检查是否已添加到配置文件
+    if [ -f "$shell_rc" ] && grep -q 'HOME/.open-skills' "$shell_rc" 2>/dev/null; then
+        return
+    fi
+
+    # 自动添加 PATH
+    local path_entry="export PATH=\"\$HOME/.open-skills:\$PATH\""
+    echo "" >> "$shell_rc"
+    echo "# open-skills" >> "$shell_rc"
+    echo "$path_entry" >> "$shell_rc"
+
+    echo -e "${GREEN}✓${NC} 已自动添加全局命令到 PATH"
+    echo -e "${YELLOW}请运行: source $shell_rc 或重新打开终端${NC}"
 }
 
 # 运行自动检查
