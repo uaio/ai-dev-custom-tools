@@ -296,11 +296,11 @@ do_link_global_cmd() {
         return 0
     fi
 
-    # 检测 shell 配置文件
+    # 检测 shell 配置文件（优先使用 $SHELL，兼容 curl 管道执行）
     local shell_rc=""
-    if [ -n "$ZSH_VERSION" ]; then
+    if [ -n "$ZSH_VERSION" ] || echo "$SHELL" | grep -q "zsh"; then
         shell_rc="$HOME/.zshrc"
-    elif [ -n "$BASH_VERSION" ]; then
+    elif [ -n "$BASH_VERSION" ] || echo "$SHELL" | grep -q "bash"; then
         shell_rc="$HOME/.bashrc"
     else
         # 默认使用 zshrc (macOS)
@@ -644,11 +644,11 @@ auto_link_global_cmd() {
         return
     fi
 
-    # 检测 shell 配置文件
+    # 检测 shell 配置文件（优先使用 $SHELL，兼容 curl 管道执行）
     local shell_rc=""
-    if [ -n "$ZSH_VERSION" ]; then
+    if [ -n "$ZSH_VERSION" ] || echo "$SHELL" | grep -q "zsh"; then
         shell_rc="$HOME/.zshrc"
-    elif [ -n "$BASH_VERSION" ]; then
+    elif [ -n "$BASH_VERSION" ] || echo "$SHELL" | grep -q "bash"; then
         shell_rc="$HOME/.bashrc"
     else
         shell_rc="$HOME/.zshrc"
