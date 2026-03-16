@@ -240,30 +240,30 @@ uninstall_all() {
 # 首次安装 setup
 do_setup() {
     echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║     open-skills 安装向导               ║${NC}"
+    echo -e "${BLUE}║     open-skills 安装向导               ║${NC}
     echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
     echo ""
 
     # 检查是否已安装
     if [ -d "$OPEN_SKILLS_DIR" ]; then
         echo -e "${YELLOW}open-skills 已安装在 $OPEN_SKILLS_DIR${NC}"
-        echo -n "是否重新安装？(y/N): "
-        read confirm
-        if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
-            echo "已取消"
-            exit 0
-        fi
-        rm -rf "$OPEN_SKILLS_DIR"
+        echo -e "${GREEN}正在更新...${NC}"
+        cd "$OPEN_SKILLS_DIR"
+        git pull origin main
+        echo -e "${GREEN}✓${NC} 更新完成"
+        echo ""
+    else
+        # Clone 项目
+        echo -e "${YELLOW}正在克隆项目...${NC}"
+        git clone "$REPO_URL" "$OPEN_SKILLS_DIR"
+        echo -e "${GREEN}✓${NC} 项目已克隆到 $OPEN_SKILLS_DIR"
+        echo ""
     fi
 
-    # Clone 项目
-    echo -e "${YELLOW}正在克隆项目...${NC}"
-    git clone "$REPO_URL" "$OPEN_SKILLS_DIR"
-    echo -e "${GREEN}✓${NC} 项目已克隆到 $OPEN_SKILLS_DIR"
-    echo ""
-
-    # 创建全局命令
-    do_link_global_cmd
+    # 检查 skills 命令是否可用
+    if ! command -v skills &> /dev/null; then
+        do_link_global_cmd
+    fi
 
     echo ""
     echo -e "${GREEN}╔════════════════════════════════════════╗${NC}"
