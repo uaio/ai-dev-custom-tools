@@ -260,6 +260,11 @@ do_setup() {
         echo ""
     fi
 
+    # 确保 bin 目录和 skills 命令存在
+    mkdir -p "$OPEN_SKILLS_DIR/bin"
+    ln -sf "$OPEN_SKILLS_DIR/install.sh" "$OPEN_SKILLS_DIR/bin/skills"
+    chmod +x "$OPEN_SKILLS_DIR/bin/skills"
+
     # 检查 skills 命令是否可用
     if ! command -v skills > /dev/null 2>&1; then
         do_link_global_cmd
@@ -276,7 +281,7 @@ do_setup() {
 
 # 创建全局命令（通过 PATH 方式）
 do_link_global_cmd() {
-    local path_entry="export PATH=\"\$HOME/.open-skills:\$PATH\""
+    local path_entry="export PATH=\"\$HOME/.open-skills/bin:\$PATH\""
 
     # 检查 skills 命令是否已可用
     if command -v skills > /dev/null 2>&1; then
@@ -296,7 +301,7 @@ do_link_global_cmd() {
     fi
 
     # 检查是否已添加 PATH
-    if [ -f "$shell_rc" ] && grep -q 'HOME/.open-skills' "$shell_rc" 2>/dev/null; then
+    if [ -f "$shell_rc" ] && grep -q 'HOME/.open-skills/bin' "$shell_rc" 2>/dev/null; then
         echo -e "${CYAN}⊙${NC} PATH 已配置在 $shell_rc"
         echo -e "${YELLOW}请运行: source $shell_rc 或重新打开终端${NC}"
         return 0
@@ -316,28 +321,28 @@ do_unlink_global_cmd() {
     local removed=false
 
     # 从 zshrc 移除
-    if [ -f "$HOME/.zshrc" ] && grep -q 'HOME/.open-skills' "$HOME/.zshrc" 2>/dev/null; then
+    if [ -f "$HOME/.zshrc" ] && grep -q 'HOME/.open-skills/bin' "$HOME/.zshrc" 2>/dev/null; then
         # 移除包含 open-skills 的行
         if command -v gsed > /dev/null 2>&1; then
-            gsed -i '/# open-skills/d; /HOME\/.open-skills/d' "$HOME/.zshrc"
+            gsed -i '/# open-skills/d; /HOME\/.open-skills\/bin/d' "$HOME/.zshrc"
         elif sed --version 2>&1 | grep -q GNU; then
-            sed -i '/# open-skills/d; /HOME\/.open-skills/d' "$HOME/.zshrc"
+            sed -i '/# open-skills/d; /HOME\/.open-skills\/bin/d' "$HOME/.zshrc"
         else
             # macOS sed
-            sed -i '' '/# open-skills/d; /HOME\/.open-skills/d' "$HOME/.zshrc"
+            sed -i '' '/# open-skills/d; /HOME\/.open-skills\/bin/d' "$HOME/.zshrc"
         fi
         echo -e "${GREEN}✓${NC} 已从 ~/.zshrc 移除 PATH 配置"
         removed=true
     fi
 
     # 从 bashrc 移除
-    if [ -f "$HOME/.bashrc" ] && grep -q 'HOME/.open-skills' "$HOME/.bashrc" 2>/dev/null; then
+    if [ -f "$HOME/.bashrc" ] && grep -q 'HOME/.open-skills/bin' "$HOME/.bashrc" 2>/dev/null; then
         if command -v gsed > /dev/null 2>&1; then
-            gsed -i '/# open-skills/d; /HOME\/.open-skills/d' "$HOME/.bashrc"
+            gsed -i '/# open-skills/d; /HOME\/.open-skills\/bin/d' "$HOME/.bashrc"
         elif sed --version 2>&1 | grep -q GNU; then
-            sed -i '/# open-skills/d; /HOME\/.open-skills/d' "$HOME/.bashrc"
+            sed -i '/# open-skills/d; /HOME\/.open-skills\/bin/d' "$HOME/.bashrc"
         else
-            sed -i '' '/# open-skills/d; /HOME\/.open-skills/d' "$HOME/.bashrc"
+            sed -i '' '/# open-skills/d; /HOME\/.open-skills\/bin/d' "$HOME/.bashrc"
         fi
         echo -e "${GREEN}✓${NC} 已从 ~/.bashrc 移除 PATH 配置"
         removed=true
@@ -628,7 +633,7 @@ auto_link_global_cmd() {
     fi
 
     # 检查 PATH 中是否已包含
-    if echo "$PATH" | grep -q "$HOME/.open-skills"; then
+    if echo "$PATH" | grep -q "$HOME/.open-skills/bin"; then
         return
     fi
 
@@ -643,12 +648,12 @@ auto_link_global_cmd() {
     fi
 
     # 检查是否已添加到配置文件
-    if [ -f "$shell_rc" ] && grep -q 'HOME/.open-skills' "$shell_rc" 2>/dev/null; then
+    if [ -f "$shell_rc" ] && grep -q 'HOME/.open-skills/bin' "$shell_rc" 2>/dev/null; then
         return
     fi
 
     # 自动添加 PATH
-    local path_entry="export PATH=\"\$HOME/.open-skills:\$PATH\""
+    local path_entry="export PATH=\"\$HOME/.open-skills/bin:\$PATH\""
     echo "" >> "$shell_rc"
     echo "# open-skills" >> "$shell_rc"
     echo "$path_entry" >> "$shell_rc"
