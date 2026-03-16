@@ -270,19 +270,7 @@ do_setup() {
     echo -e "${GREEN}║     安装成功！                         ║${NC}"
     echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
     echo ""
-
-    # 询问是否自动安装
-    echo -n "是否自动安装 skills 到所有工具？(Y/n): "
-    read auto_install
-    if [ "$auto_install" != "n" ] && [ "$auto_install" != "N" ]; then
-        echo ""
-        install_all
-    else
-        echo ""
-        echo -e "稍后运行 ${CYAN}skills all${NC} 安装到所有工具"
-    fi
-
-    echo ""
+    echo -e "运行 ${CYAN}skills all${NC} 安装到所有工具"
     echo -e "更多命令运行 ${CYAN}skills help${NC} 查看"
 }
 
