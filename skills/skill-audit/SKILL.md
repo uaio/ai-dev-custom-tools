@@ -1,8 +1,8 @@
+---
 name: custom:skill-audit
 description: 评估 skill 质量并生成优化建议。Use when 用户想评估 skill 质量、优化 skill 内容、或说"审计skill""skill评分""skill优化""评估skill"时。触发词：skill审计、skill评分、skill优化、质量评估。
 argument-hint: [skill名称，留空则审计全部]
 context: fork
-
 ---
 
 # 元 Skill：Skill 质量审计
