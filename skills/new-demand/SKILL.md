@@ -77,9 +77,61 @@ description: 本需求主索引 skill。Use when 用户提到“需求-20260314-
 
 # 后续更新规则（按需加载）
 
-用户说“更新任务01 已完成，原因：测试通过” → 自动加载主 skill 并更新对应 tasks/01-xxx.md
-用户说“查看需求-20260314-0823” 或 “整体进度” → 自动加载主 skill
+用户说”更新任务01 已完成，原因：测试通过” → 自动加载主 skill 并更新对应 tasks/01-xxx.md
+用户说”查看需求-20260314-0823” 或 “整体进度” → 自动加载主 skill
 全部任务完成后：
 生成完整文档到 docs/requirements/需求-YYYYMMDD-hhmm-主题.md
 等待用户验证后归档到 docs/archived-requirements/
 归档完成后删除skill： 需求-YYYYMMDD-hhmm-主题
+
+## 示例交互
+
+```
+用户: /new-demand 实现用户登录功能，支持邮箱和手机号登录
+
+AI: <thinking>
+用户需要一个登录功能，涉及认证模块...
+主题应该是 user-login-auth
+</thinking>
+
+    生成的标题：需求-20260317-1430-用户登录认证
+
+    这个标题是否确认？需要修改主题吗？
+
+用户: 确认
+
+AI: ## 完整方案
+
+    ### 任务拆分
+    1. 创建登录表单组件 → src/components/LoginForm.tsx
+    2. 实现邮箱登录 API → src/api/auth.ts
+    3. 实现手机号登录 API → src/api/auth.ts
+    4. 添加登录状态管理 → src/stores/auth.ts
+    5. 编写单元测试 → src/__tests__/auth.test.ts
+
+    ### 风险说明
+    - 手机验证码需要对接第三方服务
+    - 登录失败需要限流保护
+
+    确认执行？
+
+用户: 执行
+
+AI: ✓ 已创建需求目录: .claude/skills/需求-20260317-1430-用户登录认证/
+    ✓ 已生成 SKILL.md
+    ✓ 已生成 5 个任务文件到 tasks/
+
+    现在可以：
+    - 说”更新任务01 进行中”更新状态
+    - 说”查看需求-20260317-1430”查看进度
+```
+
+## 验收标准
+
+执行完成后必须满足：
+
+- [ ] `.claude/skills/需求-YYYYMMDD-hhmm-主题/` 目录已创建
+- [ ] SKILL.md 包含完整的 frontmatter（name、description）
+- [ ] tasks/ 目录下每个任务文件都包含：详细修改计划、当前状态、更新记录
+- [ ] 任务编号连续（01、02、03...）
+- [ ] description 中包含正确的触发词

@@ -1,6 +1,6 @@
 name: custom:project-init
 description: 自动分析项目结构并生成 project-structure skill。Use when 用户想初始化项目结构说明、生成项目结构文档、或说"初始化项目结构""生成项目结构""project init"时。
-argument-hint:
+argument-hint: [项目路径，默认当前目录]
 context: fork
 
 ---
@@ -267,3 +267,14 @@ AI: ✓ 已精简 CLAUDE.md，删除重复内容并添加引用。
 1. 如果 `.claude/skills/project-structure/` 已存在，先询问用户是否覆盖
 2. 模块识别基于常见命名约定，可能不完全准确，生成后用户可手动调整
 3. conventions.md 中的规范需要根据项目实际情况推断，可能需要用户补充
+
+## 验收标准
+
+执行完成后必须满足：
+
+- [ ] `.claude/skills/project-structure/` 目录已创建
+- [ ] SKILL.md 包含完整的 frontmatter（name、description + 触发词）
+- [ ] tech-stack.md 列出了核心依赖及其用途
+- [ ] commands.md 包含开发、构建、测试三类命令
+- [ ] 至少识别并生成了 1 个 modules/*.md 文件
+- [ ] 如存在 CLAUDE.md/AGENTS.md，已提示用户精简重复内容
