@@ -290,32 +290,33 @@ do_link_global_cmd() {
     fi
 
     # 检测 shell 配置文件（优先使用 $SHELL，兼容 curl 管道执行）
-    local shell_rc=""
+    SHELL_RC=""
     if [ -n "$ZSH_VERSION" ] || echo "$SHELL" | grep -q "zsh"; then
-        shell_rc="$HOME/.zshrc"
+        SHELL_RC="$HOME/.zshrc"
     elif [ -n "$BASH_VERSION" ] || echo "$SHELL" | grep -q "bash"; then
-        shell_rc="$HOME/.bashrc"
+        SHELL_RC="$HOME/.bashrc"
     else
         # 默认使用 zshrc (macOS)
-        shell_rc="$HOME/.zshrc"
+        SHELL_RC="$HOME/.zshrc"
     fi
 
     # 检查是否已添加 PATH
-    if [ -f "$shell_rc" ] && grep -q 'HOME/.open-skills/bin' "$shell_rc" 2>/dev/null; then
-        echo -e "${CYAN}⊙${NC} PATH 已配置在 $shell_rc"
-        echo -e "${YELLOW}请运行: source $shell_rc 或重新打开终端${NC}"
+    if [ -f "$SHELL_RC" ] && grep -q 'HOME/.open-skills/bin' "$SHELL_RC" 2>/dev/null; then
+        echo -e "${CYAN}⊙${NC} PATH 已配置在 $SHELL_RC"
+        echo -e "${YELLOW}请运行: source $SHELL_RC 或重新打开终端${NC}"
         return 0
     fi
 
     # 添加 PATH 到配置文件
-    echo "" >> "$shell_rc"
-    echo "# open-skills" >> "$shell_rc"
-    echo "$path_entry" >> "$shell_rc"
+    echo "" >> "$SHELL_RC"
+    echo "# open-skills" >> "$SHELL_RC"
+    echo "$path_entry" >> "$SHELL_RC"
 
     # 立即生效（当前进程）
     export PATH="$HOME/.open-skills/bin:$PATH"
 
-    echo -e "${GREEN}✓${NC} 已添加 PATH 到 $shell_rc（已生效）"
+    echo -e "${GREEN}✓${NC} 已添加 PATH 到 $SHELL_RC"
+    echo -e "${YELLOW}请运行: source $SHELL_RC 或重新打开终端使全局命令生效${NC}"
 }
 
 # 移除全局命令（从 PATH 中移除）
@@ -640,30 +641,31 @@ auto_link_global_cmd() {
     fi
 
     # 检测 shell 配置文件（优先使用 $SHELL，兼容 curl 管道执行）
-    local shell_rc=""
+    SHELL_RC=""
     if [ -n "$ZSH_VERSION" ] || echo "$SHELL" | grep -q "zsh"; then
-        shell_rc="$HOME/.zshrc"
+        SHELL_RC="$HOME/.zshrc"
     elif [ -n "$BASH_VERSION" ] || echo "$SHELL" | grep -q "bash"; then
-        shell_rc="$HOME/.bashrc"
+        SHELL_RC="$HOME/.bashrc"
     else
-        shell_rc="$HOME/.zshrc"
+        SHELL_RC="$HOME/.zshrc"
     fi
 
     # 检查是否已添加到配置文件
-    if [ -f "$shell_rc" ] && grep -q 'HOME/.open-skills/bin' "$shell_rc" 2>/dev/null; then
+    if [ -f "$SHELL_RC" ] && grep -q 'HOME/.open-skills/bin' "$SHELL_RC" 2>/dev/null; then
         return
     fi
 
     # 自动添加 PATH
     local path_entry="export PATH=\"\$HOME/.open-skills/bin:\$PATH\""
-    echo "" >> "$shell_rc"
-    echo "# open-skills" >> "$shell_rc"
-    echo "$path_entry" >> "$shell_rc"
+    echo "" >> "$SHELL_RC"
+    echo "# open-skills" >> "$SHELL_RC"
+    echo "$path_entry" >> "$SHELL_RC"
 
     # 立即生效
     export PATH="$HOME/.open-skills/bin:$PATH"
 
-    echo -e "${GREEN}✓${NC} 已自动添加全局命令到 PATH（已生效）"
+    echo -e "${GREEN}✓${NC} 已添加 PATH 到 $SHELL_RC"
+    echo -e "${YELLOW}请运行: source $SHELL_RC 或重新打开终端使全局命令生效${NC}"
 }
 
 # 运行自动检查
