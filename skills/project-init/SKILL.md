@@ -1,8 +1,8 @@
+---
 name: custom:project-init
 description: 自动分析项目结构并生成 project-structure skill。Use when 用户想初始化项目结构说明、生成项目结构文档、或说"初始化项目结构""生成项目结构""project init"时。
 argument-hint: [项目路径，默认当前目录]
 context: fork
-
 ---
 
 # 元 Skill：生成项目结构说明
