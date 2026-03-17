@@ -265,10 +265,8 @@ do_setup() {
     ln -sf "$OPEN_SKILLS_DIR/install.sh" "$OPEN_SKILLS_DIR/bin/skills"
     chmod +x "$OPEN_SKILLS_DIR/bin/skills"
 
-    # 检查 skills 命令是否可用
-    if ! command -v skills > /dev/null 2>&1; then
-        do_link_global_cmd
-    fi
+    # 配置全局命令（会检查配置文件中是否已有 PATH）
+    do_link_global_cmd
 
     echo ""
     echo -e "${GREEN}╔════════════════════════════════════════╗${NC}"
@@ -283,12 +281,6 @@ do_setup() {
 do_link_global_cmd() {
     local path_entry="export PATH=\"\$HOME/.open-skills/bin:\$PATH\""
 
-    # 检查 skills 命令是否已可用
-    if command -v skills > /dev/null 2>&1; then
-        echo -e "${CYAN}⊙${NC} 全局命令已可用: skills"
-        return 0
-    fi
-
     # 检测 shell 配置文件（优先使用 $SHELL，兼容 curl 管道执行）
     SHELL_RC=""
     if [ -n "$ZSH_VERSION" ] || echo "$SHELL" | grep -q "zsh"; then
@@ -300,10 +292,11 @@ do_link_global_cmd() {
         SHELL_RC="$HOME/.zshrc"
     fi
 
-    # 检查是否已添加 PATH
+    # 检查配置文件中是否已添加 PATH（这才是持久化的关键）
     if [ -f "$SHELL_RC" ] && grep -q 'HOME/.open-skills/bin' "$SHELL_RC" 2>/dev/null; then
         echo -e "${CYAN}⊙${NC} PATH 已配置在 $SHELL_RC"
-        echo -e "${YELLOW}请运行: source $SHELL_RC 或重新打开终端${NC}"
+        # 确保当前会话也生效
+        export PATH="$HOME/.open-skills/bin:$PATH"
         return 0
     fi
 
