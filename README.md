@@ -4,9 +4,20 @@
 
 ## 快速开始
 
+### macOS / Linux
+
 ```bash
 # 一键安装（自动安装到所有工具）
 curl -fsSL https://raw.githubusercontent.com/uaio/open-skills/main/install.sh | bash -s -- init
+```
+
+### Windows (PowerShell)
+
+```powershell
+# 一键安装
+irm https://raw.githubusercontent.com/uaio/open-skills/main/install.ps1 | iex
+# 然后执行
+.\install.ps1 init
 ```
 
 ## 命令
@@ -48,6 +59,8 @@ skills ls            # 查看状态
 
 ## 手动配置全局命令
 
+### macOS / Linux
+
 ```bash
 # 方法 1: PATH
 export PATH="$HOME/.open-skills:$PATH"
@@ -57,6 +70,14 @@ alias skills='bash $HOME/.open-skills/install.sh'
 
 # 方法 3: 软链接
 sudo ln -s $HOME/.open-skills/install.sh /usr/local/bin/skills
+```
+
+### Windows
+
+安装后会自动添加到 PATH，也可手动添加：
+
+```powershell
+$env:Path += ";$env:USERPROFILE\.open-skills\bin"
 ```
 
 ## License
