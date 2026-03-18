@@ -28,6 +28,7 @@ NC='\033[0m'
 # 项目配置
 REPO_URL="https://github.com/uaio/open-skills.git"
 OPEN_SKILLS_DIR="$HOME/.open-skills"
+INSTALLED_TOOLS_FILE="$OPEN_SKILLS_DIR/.installed_tools"
 
 # 获取脚本所在目录（项目根目录）
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -84,6 +85,40 @@ get_skills() {
         done
     fi
     echo "${skills[@]}"
+}
+
+# 记录已安装的工具
+record_installed_tool() {
+    local tool="$1"
+    # 确保目录存在
+    mkdir -p "$OPEN_SKILLS_DIR"
+    # 如果记录文件不存在则创建
+    touch "$INSTALLED_TOOLS_FILE"
+    # 检查是否已记录
+    if ! grep -q "^$tool$" "$INSTALLED_TOOLS_FILE" 2>/dev/null; then
+        echo "$tool" >> "$INSTALLED_TOOLS_FILE"
+    fi
+}
+
+# 移除已安装工具的记录
+remove_installed_tool() {
+    local tool="$1"
+    if [ -f "$INSTALLED_TOOLS_FILE" ]; then
+        # 使用 grep -v 过滤掉该工具
+        grep -v "^$tool$" "$INSTALLED_TOOLS_FILE" > "${INSTALLED_TOOLS_FILE}.tmp" 2>/dev/null || true
+        mv "${INSTALLED_TOOLS_FILE}.tmp" "$INSTALLED_TOOLS_FILE" 2>/dev/null || true
+        # 如果文件为空则删除
+        if [ ! -s "$INSTALLED_TOOLS_FILE" ]; then
+            rm -f "$INSTALLED_TOOLS_FILE"
+        fi
+    fi
+}
+
+# 获取已安装的工具列表
+get_installed_tools() {
+    if [ -f "$INSTALLED_TOOLS_FILE" ]; then
+        cat "$INSTALLED_TOOLS_FILE"
+    fi
 }
 
 # 创建单个 skill 的软链接
@@ -154,6 +189,9 @@ install_tool() {
         link_skill "$skill" "$target_dir"
     done
 
+    # 记录安装的工具
+    record_installed_tool "$tool"
+
     echo ""
 }
 
@@ -180,6 +218,9 @@ uninstall_tool() {
     for skill in $skills; do
         unlink_skill "$skill" "$target_dir"
     done
+
+    # 移除安装记录
+    remove_installed_tool "$tool"
 
     echo ""
 }
@@ -377,6 +418,17 @@ do_upgrade() {
 
     # 重新创建全局命令（以防万一）
     do_link_global_cmd
+
+    # 自动重新链接已安装的工具
+    local installed_tools=$(get_installed_tools)
+    if [ -n "$installed_tools" ]; then
+        echo ""
+        echo -e "${YELLOW}正在重新链接已安装的工具...${NC}"
+        for tool in $installed_tools; do
+            install_tool "$tool"
+        done
+        echo -e "${GREEN}✓${NC} 软链接已更新"
+    fi
 }
 
 # 卸载 open-skills 本身
@@ -424,6 +476,21 @@ show_status() {
         echo "  • $skill"
     done
     echo ""
+
+    # 显示已安装的工具记录
+    local installed=$(get_installed_tools)
+    if [ -n "$installed" ]; then
+        echo -e "${YELLOW}已安装的工具:${NC}"
+        for tool in $installed; do
+            local config
+            config=$(find_tool_config "$tool")
+            if [ -n "$config" ]; then
+                local tool_name=$(get_tool_display "$config")
+                echo "  • $tool_name ($tool)"
+            fi
+        done
+        echo ""
+    fi
 
     echo -e "${YELLOW}各工具安装状态:${NC}"
 
