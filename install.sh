@@ -31,7 +31,21 @@ OPEN_SKILLS_DIR="$HOME/.open-skills"
 INSTALLED_TOOLS_FILE="$OPEN_SKILLS_DIR/.installed_tools"
 
 # 获取脚本所在目录（项目根目录）
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# 如果从 bin/skills 软链接运行，需要解析到真实目录
+get_real_script_dir() {
+    local source="${BASH_SOURCE[0]}"
+    # 如果是软链接，解析到真实路径
+    if [ -L "$source" ]; then
+        local link_target="$(readlink "$source")"
+        # 处理相对路径
+        case "$link_target" in
+            /*) source="$link_target" ;;
+            *) source="$(cd "$(dirname "$source")" && cd "$(dirname "$link_target")" && pwd)/$(basename "$link_target")" ;;
+        esac
+    fi
+    cd "$(dirname "$source")" && pwd
+}
+SCRIPT_DIR="$(get_real_script_dir)"
 SKILLS_SOURCE="$SCRIPT_DIR/skills"
 
 # ============================================
